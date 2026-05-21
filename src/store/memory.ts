@@ -1,20 +1,17 @@
-const store = {
-  cases: [],
-  events: []
-}
+import { appendRuntimeEvent, hydrateCases, hydrateEvents, upsertCases } from '../runtime/osgcStore.js'
 
 export function saveCase(data: unknown) {
-  store.cases.push(data)
+  upsertCases([data as never])
 }
 
 export function listCases() {
-  return store.cases
+  return hydrateCases()
 }
 
 export function appendEvent(data: unknown) {
-  store.events.push(data)
+  appendRuntimeEvent(data as Record<string, unknown>)
 }
 
 export function listEvents() {
-  return store.events
+  return hydrateEvents()
 }
