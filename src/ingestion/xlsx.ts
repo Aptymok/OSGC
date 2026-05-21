@@ -13,6 +13,26 @@ export function mapXlsxRows(rows: Array<Record<string, unknown>>) {
     provider: String(row.provider ?? row.PROVEEDOR ?? '').trim(),
     contract: String(row.contract ?? row.CONTRATO ?? '').trim(),
     status: String(row.status ?? row.ESTADO ?? 'PENDIENTE').trim(),
-    slaProgress: Number(row.slaProgress ?? row.SLA ?? 0)
+    slaProgress: Number(row.slaProgress ?? row.SLA ?? row.SLA_PROGRESS ?? 0)
   }))
+}
+
+export async function parseXlsxBuffer(buffer: ArrayBuffer) {
+  const XLSX = await import('xlsx')
+
+  const workbook = XLSX.read(buffer, {
+    type: 'array'
+  })
+
+  const sheetName = workbook.SheetNames[0]
+
+  if (!sheetName) {
+    return []
+  }
+
+  const sheet = workbook.Sheets[sheetName]
+
+  return XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, {
+    defval: ''
+  })
 }
