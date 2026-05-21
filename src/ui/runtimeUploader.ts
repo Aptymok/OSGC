@@ -1,7 +1,24 @@
 import { ingestCsvText } from '../ingestion/pipeline.js'
 import { appendIngestion, appendRuntimeAudit, appendRuntimeEvent, upsertCases } from '../runtime/osgcStore.js'
+import { validateUploadPolicy } from '../security/uploadPolicy.js'
 
 export async function processRuntimeUpload(file: File) {
+  const policy = validateUploadPolicy(file)
+
+  if (!policy.ok) {
+    appendRuntimeAudit({
+      action: 'UPLOAD_REJECTED',
+      reason: policy.reason,
+      fileName: file.name
+    })
+
+    return {
+      ok: false,
+      errors: [{ row: 0, missing: [policy.reason] }],
+      created: []
+    }
+  }
+
   const text = await file.text()
   const result = ingestCsvText(text)
 
